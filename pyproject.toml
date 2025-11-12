@@ -10,6 +10,7 @@ python = "^3.12"
 parallel-web = "^0.3.3"
 aiohttp = "^3.13.2"
 lucene-query-parser = { version = "^0.1.0", source = "unicepta-pup" }
+python-dotenv = "^1.2.1"
 
 [[tool.poetry.source]]
 name = "unicepta-pup"

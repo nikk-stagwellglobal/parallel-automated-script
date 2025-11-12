@@ -1,9 +1,11 @@
 import asyncio
 import logging
 import os
+from dotenv import load_dotenv
 from typing import List, Dict, Any
 from parallel import Parallel
 
+load_dotenv()
 logger = logging.getLogger(__name__)
 
 

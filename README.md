@@ -26,7 +26,7 @@ gcloud auth application-default login
 ```bash
 cd parallel-ai-testing
 poetry source add unicepta-pup https://us-central1-python.pkg.dev/plat-shared-art-shared/unicepta-pup/simple/
-ACCESS_TOKEN=$(gcloud auth print-access-token)
+$ACCESS_TOKEN = gcloud auth print-access-token
 poetry config http-basic.unicepta-pup oauth2accesstoken $ACCESS_TOKEN
 ```
 
@@ -38,7 +38,7 @@ poetry install
 
 4. Set your Parallel AI API key:
 ```bash
-export PARALLEL_API_KEY="your_api_key_here"
+export PARALLEL_API_KEY="NaFdoJEUqSfILMoEnElJn6vOEpBCye7QNDsHSG2L"
 ```
 
 **Note:** Access tokens expire after 1 hour. If you encounter authentication errors, refresh your token and reconfigure Poetry. See [SETUP.md](SETUP.md) for troubleshooting.
