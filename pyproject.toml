@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "parallel-ai-testing"
+version = "0.1.0"
+description = "Automated testing script for Parallel AI Deep Research across multiple models"
+authors = ["nirmal kumar"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+parallel-web = "^0.3.3"
+aiohttp = "^3.13.2"
+lucene-query-parser = { version = "^0.1.0", source = "unicepta-pup" }
+
+[[tool.poetry.source]]
+name = "unicepta-pup"
+url = "https://us-central1-python.pkg.dev/plat-shared-art-shared/unicepta-pup/simple/"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
