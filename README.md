@@ -53,6 +53,10 @@ Run the script with default settings (all 10 brands, all available processors):
 poetry run python -m parallel_ai_testing.main
 ```
 
+```bash
+poetry run python comprehensive_test.py
+```
+
 
 ```
 parallel-ai-testing/
