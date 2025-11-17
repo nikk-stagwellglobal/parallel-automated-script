@@ -5,9 +5,9 @@ from datetime import datetime
 from pathlib import Path
 import random
 from parallel_ai_testing.parallel_client import ParallelAIClient
-from parallel_ai_testing.logger_config import setup_logger
+from parallel_ai_testing.logger_config import setup_logging
 
-logger = setup_logger()
+logger = setup_logging()
 
 BRANDS = ["Stellantis", "Airbus", "FIFA", "Bayer"]
 
@@ -73,16 +73,17 @@ Please structure your response as a JSON object with the following three widgets
 Return your response in strict JSON format with these exact widget names as top-level keys."""
 
 
-async def test_single_query(client: ParallelClient, brand: str, prompt: str, processor: str) -> dict:
+async def test_single_query(client: ParallelAIClient, brand: str, prompt: str, processor: str) -> dict:
     start_time = time.time()
     
     try:
-        result = await client.query_parallel_ai(prompt, [processor])
+        result = await client.query_all_models(prompt, brand, [processor])
         
         end_time = time.time()
         latency = end_time - start_time
         
-        processor_result = result.get(processor, {})
+        processor_result = result[0] if result else {}
+
         
         return {
             "brand": brand,
@@ -142,14 +143,65 @@ def extract_widgets(output: dict) -> dict:
     }
 
 
-async def run_comprehensive_test():
+def save_partial_results(results: list, timestamp: str, brand: str = None):
+    """Save partial results incrementally to avoid data loss."""
+    results_dir = Path("test_results")
+    results_dir.mkdir(exist_ok=True)
+    
+    # Save detailed results
+    detailed_results_file = results_dir / f"detailed_results_{timestamp}.json"
+    with open(detailed_results_file, "w") as f:
+        json.dump(results, f, indent=2)
+    
+    # Save analysis report
+    analysis = generate_analysis_report(results)
+    analysis_file = results_dir / f"analysis_report_{timestamp}.json"
+    with open(analysis_file, "w") as f:
+        json.dump(analysis, f, indent=2)
+    
+    if brand:
+        logger.info(f"💾 Partial results saved after completing {brand} ({len(results)} total tests)")
+    else:
+        logger.info(f"💾 Results saved ({len(results)} total tests)")
+    
+    return detailed_results_file, analysis_file
+
+
+def load_existing_results(timestamp: str) -> list:
+    """Load existing results from a previous partial run."""
+    results_dir = Path("test_results")
+    detailed_results_file = results_dir / f"detailed_results_{timestamp}.json"
+    
+    if detailed_results_file.exists():
+        with open(detailed_results_file, "r") as f:
+            return json.load(f)
+    return []
+
+
+async def run_comprehensive_test(timestamp: str, resume: bool = False):
     logger.info("Starting comprehensive Parallel AI testing")
     logger.info(f"Testing {len(BRANDS)} brands across {len(ALL_PROCESSORS)} processors")
+    logger.info(f"Run ID: {timestamp}")
     
-    client = ParallelClient()
+    client = ParallelAIClient()
+    
+    # Load existing results if resuming
     all_results = []
+    completed_brands = set()
+    
+    if resume:
+        all_results = load_existing_results(timestamp)
+        completed_brands = {r["brand"] for r in all_results}
+        if completed_brands:
+            logger.info(f"📂 Resuming from previous run. Already completed brands: {', '.join(completed_brands)}")
+            logger.info(f"📊 Loaded {len(all_results)} existing results")
     
     for brand in BRANDS:
+        # Skip if already completed
+        if brand in completed_brands:
+            logger.info(f"⏭️  Skipping {brand} (already completed)")
+            continue
+        
         category = random.choice(list(PROMPTS_BY_CATEGORY.keys()))
         base_question = random.choice(PROMPTS_BY_CATEGORY[category])
         base_question = base_question.format(brand=brand)
@@ -161,6 +213,8 @@ async def run_comprehensive_test():
         logger.info(f"Category: {category}")
         logger.info(f"Base question: {base_question}")
         logger.info(f"{'='*80}\n")
+        
+        brand_results = []
         
         for processor in ALL_PROCESSORS:
             logger.info(f"Testing {brand} on processor: {processor}")
@@ -181,9 +235,16 @@ async def run_comprehensive_test():
                 }
                 logger.error(f"✗ {processor}: Failed - {result['error']}")
             
+            brand_results.append(result)
             all_results.append(result)
             
             await asyncio.sleep(2)
+        
+        # Save partial results after each brand completes
+        save_partial_results(all_results, timestamp, brand)
+        
+        logger.info(f"\n✅ Completed {brand}: {len(brand_results)} tests")
+        logger.info(f"📊 Progress: {len(set(r['brand'] for r in all_results))}/{len(BRANDS)} brands completed\n")
     
     return all_results
 
@@ -256,7 +317,14 @@ def generate_analysis_report(results: list) -> dict:
     }
 
 
-async def main():
+async def main(resume_timestamp: str = None):
+    """
+    Main function to run comprehensive testing.
+    
+    Args:
+        resume_timestamp: Optional timestamp to resume from a previous partial run.
+                         Format: YYYYMMDD_HHMMSS
+    """
     logger.info("="*80)
     logger.info("COMPREHENSIVE PARALLEL AI TESTING")
     logger.info("="*80)
@@ -265,25 +333,31 @@ async def main():
     logger.info(f"Total tests: {len(BRANDS) * len(ALL_PROCESSORS)}")
     logger.info("="*80)
     
-    results = await run_comprehensive_test()
+    # Use provided timestamp or create new one
+    timestamp = resume_timestamp or datetime.now().strftime("%Y%m%d_%H%M%S")
+    resume = resume_timestamp is not None
     
+    if resume:
+        logger.info(f"🔄 Resuming run from: {timestamp}")
+    else:
+        logger.info(f"🆕 Starting new run: {timestamp}")
+    
+    # Run tests with incremental saving
+    results = await run_comprehensive_test(timestamp, resume=resume)
+    
+    # Generate final analysis
     analysis = generate_analysis_report(results)
     
+    # Final save (in case anything changed)
     results_dir = Path("test_results")
-    results_dir.mkdir(exist_ok=True)
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
     detailed_results_file = results_dir / f"detailed_results_{timestamp}.json"
-    with open(detailed_results_file, "w") as f:
-        json.dump(results, f, indent=2)
-    logger.info(f"\nDetailed results saved to: {detailed_results_file}")
-    
     analysis_file = results_dir / f"analysis_report_{timestamp}.json"
-    with open(analysis_file, "w") as f:
-        json.dump(analysis, f, indent=2)
-    logger.info(f"Analysis report saved to: {analysis_file}")
     
+    logger.info(f"\n✅ Final results saved:")
+    logger.info(f"   Detailed results: {detailed_results_file}")
+    logger.info(f"   Analysis report: {analysis_file}")
+    
+    # Print summary
     logger.info("\n" + "="*80)
     logger.info("ANALYSIS SUMMARY")
     logger.info("="*80)

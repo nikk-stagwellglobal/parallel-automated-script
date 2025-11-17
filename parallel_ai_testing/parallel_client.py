@@ -58,11 +58,18 @@ class ParallelAIClient:
                 api_timeout=3600
             )
             
+            # Convert output to dict if it has a model_dump method (Pydantic model)
+            output_data = run_result.output
+            if hasattr(output_data, 'model_dump'):
+                output_data = output_data.model_dump()
+            elif hasattr(output_data, 'dict'):
+                output_data = output_data.dict()
+            
             return {
                 "brand": brand,
                 "processor": processor,
                 "run_id": task_run.run_id,
-                "output": run_result.output,
+                "output": output_data,
                 "status": "success"
             }
         except Exception as e:

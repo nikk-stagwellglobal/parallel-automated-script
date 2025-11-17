@@ -11,15 +11,18 @@ logger = logging.getLogger(__name__)
 
 BRANDS = [
     "Stellantis",
-    "BMW",
-    "Toyota",
-    "Ford",
-    "Honda",
-    "Tesla",
-    "Mercedes",
-    "Volkswagen",
-    "Audi",
-    "Hyundai"
+    # "BMW",
+    # "Toyota",
+    # "Ford",
+    # "Honda",
+    # "Tesla",
+    # "Mercedes",
+    # "Volkswagen",
+    # "Audi",
+    # "Hyundai",
+    "Airbus",
+    "FIFA",
+    "Bayer"
 ]
 
 

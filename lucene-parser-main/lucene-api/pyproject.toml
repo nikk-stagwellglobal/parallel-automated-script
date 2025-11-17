@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = "A library for parsing Lucene queries and converting them to natural language"
+authors = ["Nirmal Kumar <nirmal.kumar@stagwellglobal.com>"]
+readme = "../README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+fastapi = {extras = ["standard"], version = "^0.118.2"}
+psycopg = {extras = ["binary"], version = "^3.2.10"}
+rahat-al-luqum = { git = "git@umt-git.unicepta.io:unicepta/stm/rahat-al-luqum.git", branch = "master" }
+pydantic-settings = "^2.11.0"
+streamlit = "^1.50.0"
+requests = "^2.32.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,1 @@
+headline:(Gallery OR "Research and markets" OR "European Factors")
