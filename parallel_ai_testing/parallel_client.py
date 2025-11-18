@@ -16,17 +16,17 @@ AVAILABLE_PROCESSORS = [
     "core2x",
     "pro",
     "ultra",
-    "ultra2x",
-    "ultra4x",
-    "ultra8x",
+    # "ultra2x",
+    # "ultra4x",
+    # "ultra8x",
 ]
 
 DEEP_RESEARCH_PROCESSORS = [
     "pro",
     "ultra",
-    "ultra2x",
-    "ultra4x",
-    "ultra8x",
+    # "ultra2x",
+    # "ultra4x",
+    # "ultra8x",
 ]
 
 

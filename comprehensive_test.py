@@ -34,7 +34,7 @@ PROMPTS_BY_CATEGORY = {
     ]
 }
 
-ALL_PROCESSORS = ["lite", "base", "core", "core2x", "pro", "ultra", "ultra2x", "ultra4x", "ultra8x"]
+ALL_PROCESSORS = ["lite", "base", "core", "core2x", "pro", "ultra"]
 
 PROCESSOR_COSTS = {
     "lite": 0.005,
@@ -43,9 +43,9 @@ PROCESSOR_COSTS = {
     "core2x": 0.050,
     "pro": 0.100,
     "ultra": 0.300,
-    "ultra2x": 0.600,
-    "ultra4x": 1.200,
-    "ultra8x": 2.400
+    # "ultra2x": 0.600,
+    # "ultra4x": 1.200,
+    # "ultra8x": 2.400
 }
 
 
